@@ -1,0 +1,8 @@
+CREATE TABLE leaderboards
+(
+    id         BIGSERIAL PRIMARY KEY,
+    duration   INT       NOT NULL,
+    username   VARCHAR   NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
