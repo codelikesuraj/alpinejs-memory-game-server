@@ -36,9 +36,9 @@ func addHighscore(ctx context.Context, highscore HighScore) (string, error) {
 
 	err := highscoredb.QueryRow(ctx, `
 		SELECT EXISTS (
-			SELECT 1 FROM leaderboards WHERE username = $1
+			SELECT 1 FROM leaderboards WHERE username = $1 AND duration > $2
 		)
-	`, highscore.Username).Scan(&exists)
+	`, highscore.Username, highscore.Duration).Scan(&exists)
 	if err != nil {
 		return "", err
 	}
