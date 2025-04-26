@@ -2,7 +2,9 @@ package leaderboard
 
 import (
 	"context"
+	"database/sql"
 	"encore.dev/storage/sqldb"
+	"errors"
 )
 
 var highscoredb = sqldb.NewDatabase("leaderboards", sqldb.DatabaseConfig{
@@ -32,40 +34,44 @@ func fetchHighScores(ctx context.Context) ([]HighScore, error) {
 }
 
 func addHighscore(ctx context.Context, highscore HighScore) (string, error) {
-	var exists bool
+	var existingDuration int
+	duration, username := highscore.Duration, highscore.Username
 
 	err := highscoredb.QueryRow(ctx, `
-		SELECT EXISTS (
-			SELECT 1 FROM leaderboards WHERE username = $1 AND duration > $2
-		)
-	`, highscore.Username, highscore.Duration).Scan(&exists)
+		SELECT duration
+		FROM leaderboards
+		WHERE username = $1
+	`, username).Scan(&existingDuration)
+
 	if err != nil {
+		// If no rows, insert
+		if errors.Is(err, sql.ErrNoRows) {
+			_, err = highscoredb.Exec(ctx, `
+				INSERT INTO leaderboards (duration, username)
+				VALUES ($1, $2)
+			`, duration, username)
+		}
+		if err != nil {
+			return "highscore added", nil
+		}
+
+		// any other error
 		return "", err
 	}
 
-	if exists {
+	// username exists, compare durations
+	if duration < existingDuration {
 		_, err = highscoredb.Exec(ctx, `
 			UPDATE leaderboards
 			SET duration = $1,
-			  	updated_at = CURRENT_TIMESTAMP
+			    updated_at = CURRENT_TIMESTAMP
 			WHERE username = $2
 		`, highscore.Duration, highscore.Username)
-
 		if err != nil {
-			return "", err
+			return "highscore updated", nil
 		}
-
-		return "highscore updated", nil
 	}
 
-	_, err = highscoredb.Exec(ctx, `
-		INSERT INTO leaderboards (duration, username)
-		VALUES ($1, $2)
-	`, highscore.Duration, highscore.Username)
-
-	if err != nil {
-		return "", err
-	}
-
-	return "highscore added", nil
+	// no updated needed (new duration is worse)
+	return "no updated needed", nil
 }
