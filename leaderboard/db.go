@@ -50,8 +50,9 @@ func addHighscore(ctx context.Context, highscore HighScore) (string, error) {
 				INSERT INTO leaderboards (duration, username)
 				VALUES ($1, $2)
 			`, duration, username)
-		}
-		if err != nil {
+			if err != nil {
+				return "", err
+			}
 			return "highscore added", nil
 		}
 

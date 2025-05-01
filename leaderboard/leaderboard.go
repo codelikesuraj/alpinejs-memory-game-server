@@ -2,6 +2,7 @@ package leaderboard
 
 import (
 	"context"
+	"encore.app/email"
 	"encore.dev/beta/errs"
 	"encore.dev/rlog"
 	"strings"
@@ -51,6 +52,15 @@ func Add(ctx context.Context, params *HighScore) error {
 		"username", username,
 		"duration", duration,
 	)
+
+	if info == "highscore added" {
+		email.HighScores.Publish(ctx, &email.NewHighScoreEvent{
+			HighScore: struct {
+				Duration int    `json:"duration"`
+				Username string `json:"username"`
+			}{Duration: duration, Username: username},
+		})
+	}
 
 	return nil
 }
