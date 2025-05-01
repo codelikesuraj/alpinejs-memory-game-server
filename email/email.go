@@ -38,8 +38,8 @@ var _ = pubsub.NewSubscription(
 
 			message := ms.Email.NewMessage()
 			message.SetFrom(mailersend.From{
-				Name:  "Abdulbaki Suraj",
-				Email: "notifications@abdulbakisuraj.com",
+				Name:  "AlpineJS Memory Game",
+				Email: "alpinejsmemorygame@abdulbakisuraj.com",
 			})
 			message.SetRecipients([]mailersend.Recipient{
 				{
@@ -47,8 +47,8 @@ var _ = pubsub.NewSubscription(
 					Email: "surajabdulbaki19@gmail.com",
 				},
 			})
-			message.SetSubject("New HighScore - AlpineJS Memory Game")
-			message.SetHTML(fmt.Sprintf("<h1>Hey Suraj,<h1><p>A new user, '%s', just completed the game in %d seconds.<p>", highscore.Username, highscore.Duration))
+			message.SetSubject("New HighScore")
+			message.SetHTML(fmt.Sprintf("<h1>New HighScore - AlpineJS Memory Game</h1><p>Hey Suraj,</p><p>A new user, '%s', just completed the game in %d seconds.<p>", highscore.Username, highscore.Duration))
 
 			_, err := ms.Email.Send(ctx, message)
 			if err != nil {
