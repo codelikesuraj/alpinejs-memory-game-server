@@ -19,7 +19,8 @@ type Resp struct {
 
 //encore:api public method=POST path=/leaderboard
 func Add(ctx context.Context, params *HighScore) error {
-	duration := params.Duration
+	duration, username := params.Duration, strings.Trim(params.Username, " ")
+
 	if duration < 1 {
 		return &errs.Error{
 			Code:    errs.InvalidArgument,
@@ -27,7 +28,6 @@ func Add(ctx context.Context, params *HighScore) error {
 		}
 	}
 
-	username := strings.Trim(params.Username, " ")
 	if l := len(username); l < 3 || l > 16 {
 		return &errs.Error{
 			Code:    errs.InvalidArgument,
